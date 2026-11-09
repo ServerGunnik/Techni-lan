@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Turniej szkolny Minecraft i CS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column. Sign-up form first, then the two tournaments, draws and brackets, schedule. */
+:root {
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --fg: #1d1f1c;
+  --muted: #5d625b;
+  --line: #d9d6cc;
+  --mc: #3f7d46;
+  --mc-soft: #e4efe3;
+  --cs: #b5501c;
+  --cs-soft: #f7e6dc;
+  --bad: #b3261e;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16181a; --surface: #1f2225; --fg: #ecebe6; --muted: #a2a79f; --line: #33373a;
+    --mc: #7cc27f; --mc-soft: #223325; --cs: #f0875a; --cs-soft: #3a2a22; --bad: #f2877f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16181a; --surface: #1f2225; --fg: #ecebe6; --muted: #a2a79f; --line: #33373a;
+  --mc: #7cc27f; --mc-soft: #223325; --cs: #f0875a; --cs-soft: #3a2a22; --bad: #f2877f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 48px;
+}
+.wrap { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 20px; font-weight: 600; }
+h3 { font-size: 16px; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+/* Logo szkoły jako tło nagłówka: wrzuć plik public/logo.png */
+header { position: relative; isolation: isolate; }
+header::before { content: ""; position: absolute; inset: -16px -8px; z-index: -1; background: url("/logo.png") right center / contain no-repeat; opacity: 0.1; pointer-events: none; }
+.lede { color: var(--muted); margin-top: 12px; max-width: 62ch; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.pills span { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 14px; }
+.sub { color: var(--muted); max-width: 62ch; }
+.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+/* Sign-up */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 20px; min-width: 0; }
+form { display: flex; flex-direction: column; gap: 16px; }
+label.field { display: flex; flex-direction: column; gap: 6px; font-weight: 500; }
+label.field small { font-weight: 400; color: var(--muted); }
+input[type="text"] {
+  font: inherit; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; width: 100%; max-width: 360px;
+}
+fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+legend { font-weight: 500; padding: 0; margin-bottom: 6px; }
+.choice { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.choice input { margin-top: 4px; width: 16px; height: 16px; flex-shrink: 0; }
+.choice.mc input { accent-color: var(--mc); }
+.choice.cs input { accent-color: var(--cs); }
+.choice small { display: block; color: var(--muted); font-size: 13px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button {
+  font: inherit; font-weight: 600; cursor: pointer;
+  border: 1px solid var(--fg); background: var(--fg); color: var(--bg);
+  border-radius: 4px; padding: 9px 16px;
+}
+button.ghost { background: transparent; color: var(--fg); border-color: var(--line); font-weight: 500; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.msg { font-size: 14px; min-height: 1.4em; }
+.msg.err { color: var(--bad); }
+.msg.ok { color: var(--mc); }
+:focus-visible { outline: 2px solid var(--mc); outline-offset: 2px; }
+
+/* Lists of signed-up players */
+.tracks { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.track { background: var(--surface); border: 1px solid var(--line); border-top-width: 4px; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.track.mc { border-top-color: var(--mc); }
+.track.cs { border-top-color: var(--cs); }
+.tag { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+.mc .tag { color: var(--mc); }
+.cs .tag { color: var(--cs); }
+dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; }
+dt { color: var(--muted); font-size: 13px; }
+dd { margin: 0; font-size: 14px; }
+.count { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; color: var(--muted); }
+.nicks { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.nicks li { border: 1px solid var(--line); border-radius: 4px; padding: 2px 8px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; overflow-wrap: anywhere; }
+.nicks li.me { border-color: var(--fg); font-weight: 500; }
+.empty { color: var(--muted); font-size: 14px; }
+
+.team-form { display: flex; flex-direction: column; gap: 16px; border-left: 3px solid var(--cs); padding-left: 14px; }
+.members { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; max-width: 560px; }
+.members input { max-width: none; }
+#list-cs li { width: 100%; }
+.nicks li .x { margin-left: 8px; padding: 0 6px; font-size: 13px; line-height: 1.4; background: transparent; color: var(--bad); border: 1px solid var(--line); border-radius: 3px; font-weight: 500; }
+footer details { margin-top: 12px; }
+footer summary { cursor: pointer; }
+footer form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+footer input[type="password"] { font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; }
+
+/* Date poll */
+.poll-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.poll-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill-opt { display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.pill-opt:has(input:checked) { border-color: var(--fg); font-weight: 600; }
+.pill-opt input { accent-color: var(--fg); }
+.poll-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.poll-card { display: flex; flex-direction: column; gap: 12px; }
+.bar { display: flex; height: 26px; border-radius: 4px; overflow: hidden; background: var(--line); }
+.seg { display: flex; align-items: center; justify-content: center; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; min-width: 24px; }
+.seg.yes { background: var(--mc); color: var(--bg); }
+.seg.maybe { background: var(--cs); color: var(--bg); }
+.seg.no { background: var(--line); color: var(--fg); }
+.poll-line { font-size: 14px; overflow-wrap: anywhere; }
+.poll-line b { font-weight: 600; }
+.lead { font-weight: 600; }
+
+/* Brackets */
+.bracket { overflow-x: auto; }
+.bracket-grid { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); gap: 18px; min-width: min-content; }
+.round { display: flex; flex-direction: column; justify-content: space-around; gap: 10px; min-width: 0; }
+.round-title { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.match { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.slot { display: block; width: 100%; text-align: left; font: inherit; font-size: 13px; font-weight: 400; border: 0; border-radius: 0; background: transparent; color: var(--fg); padding: 6px 10px; border-left: 3px solid var(--line); overflow-wrap: anywhere; }
+.slot + .slot { border-top: 1px solid var(--line); }
+button.slot { cursor: pointer; }
+button.slot:hover { background: var(--bg); }
+.slot.win { border-left-color: var(--mc); background: var(--mc-soft); font-weight: 600; }
+.cs-br .slot.win { border-left-color: var(--cs); background: var(--cs-soft); }
+.slot.lose { color: var(--muted); text-decoration: line-through; }
+.slot.wait, .slot.bye { color: var(--muted); font-style: italic; }
+.slot.me { font-weight: 700; }
+.champ { font-weight: 600; }
+.teams { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.team { border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; }
+.team h3 { font-size: 14px; margin-bottom: 4px; }
+.team ul { margin: 0; padding-left: 18px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; }
+
+/* Schedule */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 460px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: top; }
+th { font-size: 12px; font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+tr:last-child td { border-bottom: 0; }
+td.time { font-family: "IBM Plex Mono", ui-monospace, monospace; white-space: nowrap; font-variant-numeric: tabular-nums; }
+tr.break td { color: var(--muted); font-style: italic; }
+
+.admin { border-style: dashed; }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 480px) {
+  h1 { font-size: 26px; }
+  .track, .card { padding: 16px; }
+  dl { grid-template-columns: 1fr; gap: 2px 0; }
+  dt { margin-top: 8px; }
+}
+.deadline { margin-top: 14px; font-weight: 600; }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<header>
+  <p id="eyebrow" class="eyebrow">Zapisy otwarte</p>
+  <h1>Turniej szkolny Minecraft i CS</h1>
+  <p class="lede">Zapisz się podając swój nick gracza. W Minecraft gramy pojedynki 1 na 1. W CS kapitan zgłasza własną drużynę, więc nikt nie gra z przypadkowymi osobami. Format, plan i godziny ogłosimy po zakończeniu zapisów.</p>
+  <p id="deadline" class="deadline"></p>
+  <div class="pills">
+    <span>Termin: 20 lub 27 listopada, wybieramy w ankiecie</span>
+    <span>Miejsce: szkoła, pracownia</span>
+  </div>
+</header>
+
+<div id="demo-note" class="card admin" hidden>
+  <p class="sub">Część zapisów poniżej to przykłady testowe, żeby pokazać jak wygląda strona z uczestnikami.</p>
+  <div class="row" style="margin-top:12px"><button id="clear-demo" type="button" class="ghost" hidden>Usuń przykładowe zapisy</button></div>
+</div>
+
+<section id="signup">
+  <h2>Zapisy</h2>
+  <div class="card">
+    <form id="form" novalidate>
+      <label class="field" for="nick">
+        Nick gracza
+        <input id="nick" type="text" maxlength="24" autocomplete="off" spellcheck="false" placeholder="np. Kowal_123">
+        <small>Taki, pod jakim grasz w Minecraft lub CS. Od 3 do 24 znaków, widoczny dla wszystkich.</small>
+      </label>
+      <label class="field" id="code-field" for="code" hidden>
+        Kod turnieju
+        <input id="code" type="text" maxlength="40" autocomplete="off" spellcheck="false">
+        <small>Kod poda organizator.</small>
+      </label>
+      <fieldset>
+        <legend>W czym chcesz grać?</legend>
+        <label class="choice mc"><input id="g-mc" type="checkbox"><span>Minecraft<small>Pojedynki 1 na 1, format ogłosimy po zapisach</small></span></label>
+        <label class="choice cs"><input id="g-cs" type="checkbox"><span>Counter-Strike<small>Zgłaszasz całą drużynę 5 na 5 jako kapitan</small></span></label>
+      </fieldset>
+      <div id="team-box" class="team-form" hidden>
+        <label class="field" for="team-name">
+          Nazwa drużyny
+          <input id="team-name" type="text" maxlength="24" autocomplete="off" placeholder="np. Czwórka Mocy">
+        </label>
+        <fieldset>
+          <legend>Skład (nicki graczy)</legend>
+          <div class="members">
+            <input id="m1" type="text" maxlength="24" autocomplete="off" placeholder="Kapitan (Ty)" aria-label="Gracz 1, kapitan">
+            <input id="m2" type="text" maxlength="24" autocomplete="off" placeholder="Gracz 2" aria-label="Gracz 2">
+            <input id="m3" type="text" maxlength="24" autocomplete="off" placeholder="Gracz 3" aria-label="Gracz 3">
+            <input id="m4" type="text" maxlength="24" autocomplete="off" placeholder="Gracz 4" aria-label="Gracz 4">
+            <input id="m5" type="text" maxlength="24" autocomplete="off" placeholder="Gracz 5" aria-label="Gracz 5">
+            <input id="m6" type="text" maxlength="24" autocomplete="off" placeholder="Rezerwowy (opcjonalnie)" aria-label="Rezerwowy, opcjonalnie">
+          </div>
+          <small class="sub">Wpisz pięć nicków, w tym swój. Reszta drużyny nie musi się osobno zapisywać.</small>
+        </fieldset>
+      </div>
+      <div class="row">
+        <button id="save" type="submit">Zapisz mnie</button>
+        <button id="leave" type="button" class="ghost" hidden>Wypisz mnie</button>
+      </div>
+      <p id="msg" class="msg" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<section id="poll">
+  <h2>Który termin pasuje?</h2>
+  <p class="sub">Mamy dwa terminy. Zaznacz, w które dni możesz grać. Wybierzemy ten, który pasuje największej grupie.</p>
+  <div class="card">
+    <form id="poll-form" novalidate>
+      <label class="field" for="poll-nick">
+        Twój nick
+        <input id="poll-nick" type="text" maxlength="24" autocomplete="off" spellcheck="false" placeholder="ten sam co w zapisach">
+      </label>
+      <div id="poll-choices" class="poll-choices"></div>
+      <div class="row"><button id="poll-save" type="submit">Zapisz odpowiedź</button></div>
+      <p id="poll-msg" class="msg" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+  <div id="poll-results" class="poll-results"></div>
+</section>
+
+<section>
+  <h2>Kto już się zapisał</h2>
+  <div class="tracks">
+    <article class="track mc">
+      <div><span class="tag">Minecraft</span><h3>Pojedynki 1 na 1</h3></div>
+      <p class="count" id="count-mc">Wczytuję zapisy…</p>
+      <ul class="nicks" id="list-mc"></ul>
+      <p class="sub">Pojedynki 1 na 1. Format ogłosimy po zapisach.</p>
+    </article>
+    <article class="track cs">
+      <div><span class="tag">Counter-Strike</span><h3>Drużyny 5 na 5</h3></div>
+      <p class="count" id="count-cs">Wczytuję zapisy…</p>
+      <ul class="nicks" id="list-cs"></ul>
+      <p class="sub">Kapitan zgłasza gotową drużynę: 5 osób i opcjonalnie rezerwowy.</p>
+    </article>
+  </div>
+</section>
+
+<!-- Losowanie i drabinki: ukryte na czas zapisów, wrócą po ustaleniu formatu. -->
+<div hidden>
+<section id="admin-box" hidden>
+  <h2>Losowanie (tylko organizator)</h2>
+  <div class="card admin">
+    <p class="sub">Losowanie bierze graczy Minecraft i drużyny CS zgłoszone w tej chwili. Powtórne losowanie kasuje obecną drabinkę. Po losowaniu klikaj zwycięzców meczów w drabince poniżej.</p>
+    <div class="row" style="margin-top:14px">
+      <button id="draw-mc" type="button">Losuj Minecraft</button>
+      <button id="draw-cs" type="button">Losuj drabinkę CS</button>
+      <button id="clear-mc" type="button" class="ghost">Wyczyść Minecraft</button>
+      <button id="clear-cs" type="button" class="ghost">Wyczyść CS</button>
+      <button id="seed-demo" type="button" class="ghost">Dodaj przykłady</button>
+    </div>
+    <p id="admin-msg" class="msg" role="status" aria-live="polite" style="margin-top:10px"></p>
+  </div>
+</section>
+
+<section>
+  <h2>Drabinka Minecraft</h2>
+  <div class="card bracket" id="br-mc"><p class="empty">Losowanie jeszcze się nie odbyło. Pary pojawią się tutaj po zamknięciu zapisów.</p></div>
+</section>
+
+<section>
+  <h2>Drużyny i drabinka CS</h2>
+  <div id="teams-cs"></div>
+  <div class="card bracket cs-br" id="br-cs"><p class="empty">Losowanie jeszcze się nie odbyło. Drużyny pojawią się tutaj po zamknięciu zapisów.</p></div>
+</section>
+</div>
+<footer>
+  <p>Wersja robocza. Zasady i termin potwierdzi organizator.</p>
+  <details id="login-box">
+    <summary>Panel organizatora</summary>
+    <form id="login-form">
+      <label for="pw" class="sub">Hasło</label>
+      <input id="pw" type="password" autocomplete="current-password">
+      <button type="submit" class="ghost">Zaloguj</button>
+      <span id="login-msg" class="msg" role="status" aria-live="polite"></span>
+    </form>
+  </details>
+</footer>
+
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

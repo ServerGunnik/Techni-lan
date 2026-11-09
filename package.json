@@ -1,0 +1,11 @@
+{
+  "name": "turniej-szkolny",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Strona zapisów na szkolny turniej Minecraft i CS",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0"
+  }
+}
