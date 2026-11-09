@@ -201,7 +201,7 @@
     const host = $("poll-results");
     host.textContent = "";
     if (!S.poll.length) {
-      host.appendChild(el("p", "empty", S.ready ? "Nikt jeszcze nie odpowiedział. Możesz być pierwszy." : "Wczytuję odpowiedzi…"));
+      host.appendChild(el("p", "empty", S.loadFailed ? "Nie udało się wczytać odpowiedzi. Odśwież stronę za chwilę." : S.ready ? "Nikt jeszcze nie odpowiedział. Możesz być pierwszy." : "Wczytuję odpowiedzi…"));
       return;
     }
     const yesCounts = [];
@@ -387,9 +387,12 @@
       S.open = d.open !== false;
       S.deadline = d.deadline || 0;
       S.ready = true;
+      S.loadFailed = false;
       fillForm(); fillPoll(); renderAll();
     } catch (e) {
       S.ready = true;
+      S.loadFailed = true;
+      renderPoll();
       $("count-mc").textContent = "Nie udało się wczytać zapisów. Odśwież stronę.";
       $("count-cs").textContent = "Nie udało się wczytać zapisów. Odśwież stronę.";
     }

@@ -9,7 +9,8 @@ losowanie drabinek i wyniki. Statyczna strona + funkcje Vercel + baza Postgres (
    Framework zostaw na **Other**, nic nie zmieniaj w ustawieniach budowania.
    (Możesz też użyć `vercel` w terminalu z tego folderu.)
 2. W projekcie wejdź w **Storage**, wybierz **Neon** (Postgres) z Marketplace i podłącz do projektu.
-   Vercel sam doda zmienną `DATABASE_URL`. Tabele tworzą się same przy pierwszym wejściu na stronę.
+   Vercel doda zmienną z adresem bazy (`DATABASE_URL` albo z prefiksem, np. `STORAGE_DATABASE_URL`; strona rozpoznaje obie).
+   Tabele tworzą się same przy pierwszym wejściu na stronę. Po podłączeniu bazy zrób Redeploy.
 3. W **Settings → Environment Variables** dodaj:
    - `ADMIN_PASSWORD` – hasło organizatora (obowiązkowe).
    - `JOIN_CODE` – kod turnieju dla uczniów (opcjonalnie, chroni przed spamem; ustaw, jeśli link trafi poza szkołę).
