@@ -20,18 +20,19 @@
   --cs: #b5501c;
   --cs-soft: #f7e6dc;
   --bad: #b3261e;
+  --logo-filter: invert(1);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #16181a; --surface: #1f2225; --fg: #ecebe6; --muted: #a2a79f; --line: #33373a;
-    --mc: #7cc27f; --mc-soft: #223325; --cs: #f0875a; --cs-soft: #3a2a22; --bad: #f2877f;
+    --mc: #7cc27f; --mc-soft: #223325; --cs: #f0875a; --cs-soft: #3a2a22; --bad: #f2877f; --logo-filter: none;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #16181a; --surface: #1f2225; --fg: #ecebe6; --muted: #a2a79f; --line: #33373a;
-  --mc: #7cc27f; --mc-soft: #223325; --cs: #f0875a; --cs-soft: #3a2a22; --bad: #f2877f;
+  --mc: #7cc27f; --mc-soft: #223325; --cs: #f0875a; --cs-soft: #3a2a22; --bad: #f2877f; --logo-filter: none;
   color-scheme: dark;
 }
 
@@ -54,7 +55,7 @@ p { margin: 0; }
 .eyebrow { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 /* Logo szkoły jako tło nagłówka: wrzuć plik public/logo.png */
 header { position: relative; isolation: isolate; }
-header::before { content: ""; position: absolute; inset: -16px -8px; z-index: -1; background: url("/logo.png") right center / contain no-repeat; opacity: 0.1; pointer-events: none; }
+header::before { content: ""; position: absolute; inset: -16px -8px; z-index: -1; background: url("/logo.png") right center / contain no-repeat; filter: var(--logo-filter); opacity: 0.1; pointer-events: none; }
 .lede { color: var(--muted); margin-top: 12px; max-width: 62ch; }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .pills span { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; color: var(--muted); }
